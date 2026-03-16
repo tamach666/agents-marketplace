@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Templates Marketplace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Mulish:wght@300;400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #060a06;
+      --surf:     #0c120c;
+      --surf2:    #111a11;
+      --border:   #1a2a1a;
+      --lime:     #39ff14;
+      --lime2:    #22c50d;
+      --orange:   #ff6b35;
+      --blue:     #4fc3f7;
+      --yellow:   #ffd600;
+      --text:     #e8f5e8;
+      --muted:    #5a7a5a;
+      --tag-bg:   #0a160a;
+      --tag-t:    #66bb6a;
+      --r:        10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Mulish', sans-serif;
+      font-size: 15px; line-height: 1.65;
+      min-height: 100vh; overflow-x: hidden;
+    }
+
+    /* hex grid background */
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .5;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(57,255,20,.06) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255,107,53,.04) 0%, transparent 50%);
+    }
+    body::after {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(57,255,20,.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(57,255,20,.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(6,10,6,.95); backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo-hex {
+      width: 36px; height: 36px; background: var(--lime);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 20px rgba(57,255,20,.5);
+      animation: hexPulse 3s ease-in-out infinite;
+    }
+    @keyframes hexPulse {
+      0%,100% { box-shadow: 0 0 20px rgba(57,255,20,.5); }
+      50%      { box-shadow: 0 0 35px rgba(57,255,20,.8); }
+    }
+    .logo-wordmark {
+      font-family: 'Orbitron', monospace; font-size: .85rem;
+      font-weight: 700; letter-spacing: .1em; color: var(--text);
+    }
+    .logo-wordmark em { color: var(--lime); font-style: normal; }
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-link {
+      color: var(--muted); font-size: 12px; font-weight: 500;
+      padding: 6px 12px; border-radius: 5px; text-decoration: none;
+      font-family: 'Source Code Pro', monospace;
+      transition: all .16s; cursor: pointer; border: none; background: none;
+    }
+    .nav-link:hover { color: var(--lime); background: rgba(57,255,20,.06); }
+    .nav-link.active { color: var(--lime); background: rgba(57,255,20,.1); border: 1px solid rgba(57,255,20,.2); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; overflow: hidden;
+      padding: 80px 48px 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-ring {
+      position: absolute; border-radius: 50%; border: 1px solid;
+      pointer-events: none; animation: rotate 20s linear infinite;
+    }
+    .hero-ring-1 { width:600px;height:600px; top:-200px; right:-100px; border-color:rgba(57,255,20,.06); }
+    .hero-ring-2 { width:400px;height:400px; top:-100px; right:50px; border-color:rgba(57,255,20,.04); animation-duration:30s; animation-direction:reverse; }
+    @keyframes rotate { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+    .hero-inner { max-width: 1260px; margin: 0 auto; position: relative; z-index: 2; }
+
+    .hero-kicker {
+      font-family: 'Source Code Pro', monospace; font-size: 11px;
+      color: var(--lime); letter-spacing: .15em; text-transform: uppercase;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+    }
+    .kicker-bar { flex: 0 0 32px; height: 2px; background: var(--lime); border-radius: 1px; }
+
+    h1 {
+      font-family: 'Orbitron', monospace; font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 900; letter-spacing: .04em; line-height: 1.05;
+      margin-bottom: 4px;
+    }
+    h1 .hl {
+      color: var(--lime);
+      text-shadow: 0 0 30px rgba(57,255,20,.4);
+    }
+    .hero-sub {
+      color: var(--muted); font-size: 15px; font-weight: 300;
+      max-width: 600px; margin: 18px 0 10px;
+    }
+    .hero-sub strong { color: var(--text); font-weight: 600; }
+
+    /* format pills row */
+    .format-pills {
+      display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 36px;
+    }
+    .fpill {
+      font-family: 'Source Code Pro', monospace; font-size: 10px;
+      letter-spacing: .06em; padding: 4px 12px; border-radius: 4px; border: 1px solid;
+    }
+
+    .stats { display: flex; gap: 44px; flex-wrap: wrap; }
+    .stat { display: flex; flex-direction: column; gap: 2px; }
+    .stat-n {
+      font-family: 'Orbitron', monospace; font-size: 1.8rem;
+      font-weight: 800; color: var(--lime);
+      text-shadow: 0 0 20px rgba(57,255,20,.35);
+    }
+    .stat-l { font-family: 'Source Code Pro', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+
+    /* ── CONTROLS ── */
+    .controls {
+      max-width: 1260px; margin: 36px auto 0; padding: 0 48px;
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+      position: relative; z-index: 2;
+    }
+    .sw { position: relative; flex: 1; min-width: 200px; }
+    .sw svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+    input[type="search"] {
+      width: 100%; background: var(--surf); border: 1px solid var(--border);
+      border-radius: var(--r); color: var(--text);
+      font-family: 'Mulish', sans-serif; font-size: 14px;
+      padding: 11px 14px 11px 40px; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input[type="search"]::placeholder { color: var(--muted); }
+    input[type="search"]:focus { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(57,255,20,.1); }
+
+    .filters { display: flex; gap: 7px; flex-wrap: wrap; }
+    .fb {
+      background: var(--surf); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--muted); cursor: pointer;
+      font-family: 'Source Code Pro', monospace; font-size: 11px;
+      letter-spacing: .04em; padding: 7px 14px;
+      transition: all .16s;
+    }
+    .fb:hover { border-color: var(--lime); color: var(--lime); }
+    .fb.active { background: rgba(57,255,20,.1); border-color: var(--lime); color: var(--lime); font-weight: 600; }
+
+    .add-btn {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--lime); color: #060a06;
+      border: none; border-radius: var(--r); padding: 11px 20px;
+      font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+      letter-spacing: .06em; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(57,255,20,.3);
+      transition: box-shadow .2s, transform .2s;
+    }
+    .add-btn:hover { box-shadow: 0 6px 32px rgba(57,255,20,.5); transform: translateY(-1px); }
+
+    /* ── GRID ── */
+    .gw { max-width: 1260px; margin: 28px auto 90px; padding: 0 48px; position: relative; z-index: 2; }
+    .gm {
+      font-family: 'Source Code Pro', monospace; font-size: 11px;
+      color: var(--muted); margin-bottom: 22px; letter-spacing: .04em;
+    }
+    .gm b { color: var(--lime); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px,1fr)); gap: 20px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px;
+      display: flex; flex-direction: column; gap: 14px;
+      position: relative; overflow: hidden;
+      transition: transform .22s, border-color .22s, box-shadow .22s;
+      animation: rise .4s ease both;
+    }
+    @keyframes rise { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--lime), transparent);
+      opacity: 0; transition: opacity .25s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(57,255,20,.25);
+      box-shadow: 0 12px 40px rgba(57,255,20,.08), 0 0 0 1px rgba(57,255,20,.06);
+    }
+    .card:hover::before { opacity: 1; }
+
+    /* card top row */
+    .card-top { display: flex; align-items: flex-start; gap: 14px; }
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+      position: relative;
+    }
+    .card-title-block { flex: 1; min-width: 0; }
+    .card-name {
+      font-family: 'Orbitron', monospace; font-size: .78rem;
+      font-weight: 700; letter-spacing: .06em; line-height: 1.3; color: var(--text);
+    }
+    .card-cat {
+      font-family: 'Source Code Pro', monospace; font-size: 9.5px;
+      color: var(--muted); margin-top: 3px; letter-spacing: .04em;
+    }
+
+    /* format + level badges */
+    .badges { display: flex; flex-wrap: wrap; gap: 5px; }
+    .badge {
+      font-family: 'Source Code Pro', monospace; font-size: 9px;
+      letter-spacing: .07em; padding: 3px 8px; border-radius: 4px; border: 1px solid;
+      text-transform: uppercase; font-weight: 500;
+    }
+    /* format colours */
+    .fmt-python  { color:#4fc3f7; border-color:#4fc3f744; background:rgba(79,195,247,.08); }
+    .fmt-dotnet  { color:#b39ddb; border-color:#b39ddb44; background:rgba(179,157,219,.08); }
+    .fmt-react   { color:#61dafb; border-color:#61dafb44; background:rgba(97,218,251,.08); }
+    .fmt-nextjs  { color:#e8f5e8; border-color:#e8f5e844; background:rgba(232,245,232,.06); }
+    .fmt-nestjs  { color:#e0234e; border-color:#e0234e55; background:rgba(224,35,78,.08); }
+    .fmt-go      { color:#00add8; border-color:#00add844; background:rgba(0,173,216,.08); }
+    .fmt-md      { color:#ffd600; border-color:#ffd60044; background:rgba(255,214,0,.08); }
+    .fmt-json    { color:#66bb6a; border-color:#66bb6a44; background:rgba(102,187,106,.08); }
+    .fmt-js      { color:#f7df1e; border-color:#f7df1e44; background:rgba(247,223,30,.08); }
+    .fmt-ts      { color:#3178c6; border-color:#3178c644; background:rgba(49,120,198,.12); }
+
+    /* level colours */
+    .lvl-beginner     { color:#66bb6a; border-color:#66bb6a44; background:rgba(102,187,106,.08); }
+    .lvl-intermediate { color:#ffd600; border-color:#ffd60044; background:rgba(255,214,0,.08); }
+    .lvl-advanced     { color:#ff6b35; border-color:#ff6b3544; background:rgba(255,107,53,.08); }
+
+    /* type badge */
+    .type-skeleton  { color:#4fc3f7; border-color:#4fc3f733; background:rgba(79,195,247,.06); }
+    .type-template  { color:#39ff14; border-color:#39ff1433; background:rgba(57,255,20,.06); }
+    .type-bestprac  { color:#ffd600; border-color:#ffd60033; background:rgba(255,214,0,.06); }
+    .type-method    { color:#b39ddb; border-color:#b39ddb33; background:rgba(179,157,219,.06); }
+    .type-fullstack { color:#ff6b35; border-color:#ff6b3533; background:rgba(255,107,53,.06); }
+
+    /* description */
+    .card-desc { color: var(--muted); font-size: 13.5px; line-height: 1.7; flex: 1; font-weight: 300; }
+
+    /* feature list */
+    .features {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .feat {
+      display: flex; align-items: baseline; gap: 7px;
+      font-family: 'Source Code Pro', monospace; font-size: 10.5px; color: var(--muted);
+    }
+    .feat::before { content: '▸'; color: var(--lime); font-size: 9px; flex-shrink: 0; }
+
+    /* stack row */
+    .stack-row { display: flex; flex-wrap: wrap; gap: 5px; }
+    .stack-chip {
+      font-family: 'Source Code Pro', monospace; font-size: 9.5px;
+      color: var(--tag-t); background: var(--tag-bg);
+      border: 1px solid rgba(102,187,106,.2); border-radius: 4px; padding: 2px 8px;
+    }
+
+    .sep { height: 1px; background: var(--border); margin: 0 -24px; }
+
+    .card-foot { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      border-radius: 7px; cursor: pointer;
+      font-family: 'Source Code Pro', monospace; font-size: 11px; font-weight: 500;
+      padding: 8px 14px; text-decoration: none; transition: all .16s; letter-spacing: .03em;
+    }
+    .bp { background: var(--lime); color: #060a06; border: 1px solid var(--lime); font-weight: 700; box-shadow: 0 2px 10px rgba(57,255,20,.2); }
+    .bp:hover { box-shadow: 0 4px 20px rgba(57,255,20,.4); transform: translateY(-1px); }
+    .bg { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .bg:hover { color: var(--text); border-color: var(--muted); }
+    .bx { margin-left: auto; background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .bx:hover { color: #ff6b6b; border-color: #ff6b6b; }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.85);
+      backdrop-filter: blur(12px); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surf); border: 1px solid var(--border);
+      border-top: 2px solid var(--lime);
+      border-radius: 16px; padding: 38px; width: 100%; max-width: 580px;
+      max-height: 92vh; overflow-y: auto;
+      transform: translateY(20px); transition: transform .25s; position: relative;
+    }
+    .overlay.open .modal { transform: translateY(0); }
+    .modal-hd {
+      font-family: 'Orbitron', monospace; font-size: 1.1rem;
+      font-weight: 800; letter-spacing: .06em; margin-bottom: 24px;
+      color: var(--text);
+    }
+    .modal-hd span { color: var(--lime); }
+    .fg { margin-bottom: 14px; }
+    label {
+      display: block; font-family: 'Source Code Pro', monospace;
+      font-size: 10px; color: var(--muted); margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: .09em;
+    }
+    input[type="text"], input[type="url"], textarea, select {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: 'Mulish', sans-serif; font-size: 14px;
+      padding: 10px 13px; outline: none; transition: border-color .18s, box-shadow .18s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--lime); box-shadow: 0 0 0 2px rgba(57,255,20,.1); }
+    textarea { resize: vertical; min-height: 80px; }
+    select option { background: var(--surf2); }
+    .fr { display: flex; gap: 12px; }
+    .fr .fg { flex: 1; }
+    .ma { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+    .xb {
+      position: absolute; top: 14px; right: 14px;
+      background: var(--surf2); border: 1px solid var(--border);
+      border-radius: 7px; color: var(--muted); cursor: pointer;
+      font-size: 14px; width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center; transition: color .16s;
+    }
+    .xb:hover { color: var(--text); }
+
+    /* section label inside modal */
+    .form-section {
+      font-family: 'Source Code Pro', monospace; font-size: 10px;
+      color: var(--lime); text-transform: uppercase; letter-spacing: .1em;
+      margin: 18px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    }
+
+    /* empty */
+    .empty { grid-column:1/-1; text-align:center; padding:80px 20px; color:var(--muted); }
+    .empty-i { font-size: 52px; margin-bottom: 16px; }
+    .empty h3 { font-family:'Orbitron',monospace; font-size:1rem; letter-spacing:.06em; color:var(--text); margin-bottom:8px; }
+
+    /* footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 26px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'Source Code Pro', monospace; font-size: 11px; color: var(--muted);
+      flex-wrap: wrap; gap: 12px; position: relative; z-index: 2;
+    }
+    footer a { color: var(--lime); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .fnav { display: flex; gap: 20px; }
+
+    @media(max-width:640px) {
+      nav, .hero, .controls, .gw, footer { padding-left: 20px; padding-right: 20px; }
+      .fr { flex-direction: column; gap: 0; }
+      .hero-ring-1, .hero-ring-2 { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-hex">🤖</div>
+    <span class="logo-wordmark">AGENT <em>FORGE</em></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link active">Agents</a>
+    <a class="nav-link" href="roo-modes-marketplace.html">Roo Modes →</a>
+    <a class="nav-link" href="mcp-marketplace.html">MCP →</a>
+    <a class="nav-link" href="tools-marketplace.html">Tools →</a>
+    <a class="nav-link" href="skills-marketplace.html">Skills →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-ring hero-ring-1"></div>
+  <div class="hero-ring hero-ring-2"></div>
+  <div class="hero-inner">
+    <div class="hero-kicker"><span class="kicker-bar"></span> Agent Templates · Skeleton Code · Best Practices</div>
+    <h1>AGENT <span class="hl">FORGE</span><br>MARKETPLACE</h1>
+    <p class="hero-sub">
+      Production-ready <strong>agent templates</strong> across every major stack.
+      Clone a skeleton, follow a methodology, or start from a battle-tested best-practices guide —
+      in your language of choice.
+    </p>
+    <div class="format-pills">
+      <span class="fpill fmt-python">Python</span>
+      <span class="fpill fmt-dotnet">.NET / C#</span>
+      <span class="fpill fmt-react">React</span>
+      <span class="fpill fmt-nextjs">Next.js</span>
+      <span class="fpill fmt-nestjs">NestJS</span>
+      <span class="fpill fmt-go">Go</span>
+      <span class="fpill fmt-ts">TypeScript</span>
+      <span class="fpill fmt-js">JavaScript</span>
+      <span class="fpill fmt-json">JSON</span>
+      <span class="fpill fmt-md">Markdown</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="stat-n" id="totalCount">0</span><span class="stat-l">Templates</span></div>
+      <div class="stat"><span class="stat-n" id="catCount">0</span><span class="stat-l">Categories</span></div>
+      <div class="stat"><span class="stat-n">10</span><span class="stat-l">Languages</span></div>
+      <div class="stat"><span class="stat-n">OSS</span><span class="stat-l">License</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="sw">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" id="searchInput" placeholder="Search templates by name, stack, type or category…" />
+  </div>
+  <div class="filters" id="filters"></div>
+  <button class="add-btn" onclick="openModal()">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    ADD
+  </button>
+</div>
+
+<!-- GRID -->
+<div class="gw">
+  <div class="gm">// <b id="showing">0</b> agent templates found</div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="overlay" onclick="bc(event)">
+  <div class="modal">
+    <button class="xb" onclick="closeModal()">✕</button>
+    <div class="modal-hd">ADD <span>AGENT</span> TEMPLATE</div>
+
+    <div class="form-section">// Basic Info</div>
+    <div class="fr">
+      <div class="fg"><label>Template Name *</label><input type="text" id="f_name" placeholder="e.g. FastAPI RAG Agent" /></div>
+      <div class="fg"><label>Version</label><input type="text" id="f_version" placeholder="v1.0.0" /></div>
+    </div>
+    <div class="fg"><label>Category</label>
+      <select id="f_cat">
+        <option>RAG & Retrieval</option><option>Multi-Agent</option><option>Tool Calling</option>
+        <option>Conversational</option><option>Code Generation</option><option>Data Processing</option>
+        <option>Customer Service</option><option>Research & Analysis</option>
+        <option>Workflow Automation</option><option>Vision & Multimodal</option><option>Other</option>
+      </select>
+    </div>
+    <div class="fg"><label>Description *</label><textarea id="f_desc" placeholder="What does this agent template do?"></textarea></div>
+
+    <div class="form-section">// Stack & Format</div>
+    <div class="fr">
+      <div class="fg"><label>Primary Language/Framework</label>
+        <select id="f_fmt">
+          <option value="python">Python</option><option value="dotnet">.NET / C#</option>
+          <option value="react">React</option><option value="nextjs">Next.js</option>
+          <option value="nestjs">NestJS</option><option value="go">Go</option>
+          <option value="ts">TypeScript</option><option value="js">JavaScript</option>
+          <option value="json">JSON</option><option value="md">Markdown</option>
+        </select>
+      </div>
+      <div class="fg"><label>Template Type</label>
+        <select id="f_type">
+          <option value="skeleton">Skeleton Code</option>
+          <option value="template">Full Template</option>
+          <option value="bestprac">Best Practices</option>
+          <option value="method">Methodology</option>
+          <option value="fullstack">Full-Stack</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Complexity Level</label>
+        <select id="f_level">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+      <div class="fg"><label>Icon (emoji)</label><input type="text" id="f_icon" placeholder="🤖" maxlength="4" /></div>
+    </div>
+
+    <div class="form-section">// Details</div>
+    <div class="fg"><label>Key Features (one per line)</label>
+      <textarea id="f_features" rows="3" placeholder="Async tool calling with retry logic&#10;Structured output validation&#10;Streaming response support"></textarea>
+    </div>
+    <div class="fg"><label>Stack / Dependencies (comma separated)</label>
+      <input type="text" id="f_stack" placeholder="anthropic, fastapi, langchain, pydantic" />
+    </div>
+    <div class="fg"><label>Tags (comma separated)</label>
+      <input type="text" id="f_tags" placeholder="rag, retrieval, vector-db, async" />
+    </div>
+
+    <div class="form-section">// Links</div>
+    <div class="fg"><label>Download / GitHub URL *</label>
+      <input type="url" id="f_link" placeholder="https://github.com/…" />
+    </div>
+    <div class="fg"><label>Docs / README URL</label>
+      <input type="url" id="f_docs" placeholder="https://…" />
+    </div>
+
+    <div class="ma">
+      <button class="btn bg" onclick="closeModal()">Cancel</button>
+      <button class="btn bp" onclick="addItem()">Register Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>Agent Forge Marketplace &mdash; <a href="https://docs.anthropic.com" target="_blank">docs.anthropic.com</a></span>
+  <div class="fnav">
+    <a href="roo-modes-marketplace.html">Roo Modes</a>
+    <a href="mcp-marketplace.html">MCP</a>
+    <a href="tools-marketplace.html">Tools</a>
+    <a href="skills-marketplace.html">Skills</a>
+    <a href="https://github.com/" target="_blank">GitHub</a>
+  </div>
+</footer>
+
+<script>
+/* ─── Data ─── */
+const DEFAULTS = [
+
+  /* ════════════════════════════════
+     RAG & RETRIEVAL
+  ════════════════════════════════ */
+  {id:1, name:"FastAPI RAG Agent", version:"v2.0.0", icon:"🔎", category:"RAG & Retrieval",
+   fmt:"python", type:"skeleton", level:"intermediate",
+   desc:"A production-ready Retrieval-Augmented Generation agent built with FastAPI and LangChain. Connects to Pinecone for vector search, streams answers with Claude, and exposes a clean REST API with async endpoints.",
+   features:["Async Pinecone vector retrieval","Claude streaming via SSE","Pydantic v2 request/response models","Docker-ready with health checks","JWT auth middleware included"],
+   stack:["anthropic","fastapi","langchain","pinecone","pydantic","uvicorn","docker"],
+   tags:["rag","retrieval","fastapi","pinecone","streaming","async"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:2, name:"Next.js RAG Chat App", version:"v1.3.0", icon:"💬", category:"RAG & Retrieval",
+   fmt:"nextjs", type:"fullstack", level:"intermediate",
+   desc:"Full-stack RAG chat application with a Next.js 14 App Router frontend and API routes as the backend. Supports document upload, chunking, embedding, and Claude-powered Q&A with source citations.",
+   features:["App Router + Server Actions","Document upload & chunking","OpenAI embeddings + pgvector","Claude answer synthesis","Source citation rendering","Vercel-deploy-ready"],
+   stack:["nextjs","typescript","anthropic","pgvector","tailwind","prisma","vercel"],
+   tags:["nextjs","rag","fullstack","typescript","chat","app-router"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:3, name:"RAG Agent — Best Practices Guide", version:"v1.0.0", icon:"📗", category:"RAG & Retrieval",
+   fmt:"md", type:"bestprac", level:"beginner",
+   desc:"A comprehensive Markdown guide covering RAG architecture decisions: chunking strategies, embedding model selection, retrieval algorithms (BM25 vs dense vs hybrid), reranking, and answer faithfulness evaluation.",
+   features:["Chunking strategy comparison","Embedding model benchmarks","Hybrid search patterns","Reranking with Cohere","Faithfulness & relevance metrics","Anti-patterns to avoid"],
+   stack:["markdown","langchain","llamaindex","cohere","openai","pgvector"],
+   tags:["rag","best-practices","guide","chunking","embeddings","evaluation"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:4, name:".NET RAG Agent (C#)", version:"v1.1.0", icon:"🔷", category:"RAG & Retrieval",
+   fmt:"dotnet", type:"skeleton", level:"intermediate",
+   desc:"A skeleton C# agent using Microsoft.SemanticKernel and the Anthropic SDK for .NET. Integrates Azure AI Search for retrieval and follows Clean Architecture with interfaces, DI, and xUnit tests.",
+   features:["SemanticKernel orchestration","Azure AI Search integration","Clean Architecture layers","Dependency Injection setup","xUnit + Moq test skeleton","ASP.NET Core Web API host"],
+   stack:["dotnet","csharp","semantic-kernel","azure-ai-search","anthropic","aspnet","xunit"],
+   tags:["dotnet","csharp","semantic-kernel","azure","rag","clean-architecture"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     MULTI-AGENT
+  ════════════════════════════════ */
+  {id:5, name:"Multi-Agent Orchestrator (Python)", version:"v1.5.0", icon:"🕸️", category:"Multi-Agent",
+   fmt:"python", type:"skeleton", level:"advanced",
+   desc:"Skeleton for a multi-agent system with an Orchestrator agent that routes tasks to specialist sub-agents. Includes a Planner, Researcher, Coder, and Critic agent — each with its own tool set and memory.",
+   features:["Orchestrator → sub-agent routing","Shared message bus (Redis)","Per-agent tool namespacing","Parallel sub-agent execution","Critic agent for output validation","Full async with asyncio"],
+   stack:["anthropic","redis","asyncio","pydantic","loguru","python"],
+   tags:["multi-agent","orchestration","parallel","sub-agents","async","redis"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:6, name:"NestJS Multi-Agent API", version:"v1.2.0", icon:"🐈", category:"Multi-Agent",
+   fmt:"nestjs", type:"skeleton", level:"advanced",
+   desc:"NestJS microservices-based multi-agent framework. Each agent runs as a standalone NestJS module with its own queue. BullMQ handles task routing. Includes a gateway WebSocket for real-time agent status streaming.",
+   features:["NestJS modular architecture","BullMQ task queuing","WebSocket gateway for live updates","Agent registry & discovery","TypeORM for agent memory persistence","OpenTelemetry tracing"],
+   stack:["nestjs","typescript","bullmq","websocket","typeorm","opentelemetry","anthropic"],
+   tags:["nestjs","typescript","multi-agent","bullmq","websocket","microservices"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:7, name:"Multi-Agent Methodology Guide", version:"v1.0.0", icon:"📐", category:"Multi-Agent",
+   fmt:"md", type:"method", level:"intermediate",
+   desc:"A structured Markdown methodology for designing multi-agent systems: agent decomposition patterns, communication topologies (hub-spoke, peer-to-peer, blackboard), failure handling, and observability.",
+   features:["Agent decomposition patterns","Hub-spoke vs peer-to-peer topology","Failure handling & retries","Deadlock prevention strategies","Cost optimisation by agent tier","Evaluation & benchmarking"],
+   stack:["markdown"],
+   tags:["multi-agent","methodology","design-patterns","observability","evaluation"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     TOOL CALLING
+  ════════════════════════════════ */
+  {id:8, name:"Tool-Calling Agent Skeleton (Python)", version:"v2.1.0", icon:"🔧", category:"Tool Calling",
+   fmt:"python", type:"skeleton", level:"beginner",
+   desc:"The canonical Python skeleton for a Claude tool-calling agent. Demonstrates the tool definition schema, agentic loop, result injection, parallel tool calls, and error handling with retry logic.",
+   features:["Tool schema definition helpers","Agentic loop implementation","Parallel tool execution","Error handling & retries","Streaming response support","Rich console output"],
+   stack:["anthropic","python","asyncio","rich"],
+   tags:["tool-calling","skeleton","agentic-loop","parallel","streaming","beginner"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:9, name:"Tool-Calling Agent (TypeScript)", version:"v1.4.0", icon:"🔩", category:"Tool Calling",
+   fmt:"ts", type:"skeleton", level:"beginner",
+   desc:"TypeScript skeleton for Claude tool calling. Fully typed tool definitions using Zod for schema validation and runtime type checking. Includes tool result parsing and multi-turn conversation management.",
+   features:["Zod schema-derived tool definitions","Fully typed tool call results","Multi-turn conversation state","Streaming with typed chunks","Unit test skeleton with Jest","ESM + CommonJS builds"],
+   stack:["anthropic","typescript","zod","jest","tsx"],
+   tags:["typescript","tool-calling","zod","typed","jest","skeleton"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:10, name:"Tool-Calling Best Practices (JSON Schema)", version:"v1.0.0", icon:"📋", category:"Tool Calling",
+   fmt:"json", type:"bestprac", level:"beginner",
+   desc:"A curated JSON collection of well-designed tool definitions covering common patterns: search, code execution, file I/O, web scraping, calendar, database query. Each includes name, description, and parameter schema.",
+   features:["20 production-ready tool schemas","Naming convention guide","Parameter description best practices","Input validation patterns","Error return schemas","Composable tool primitives"],
+   stack:["json","anthropic"],
+   tags:["tool-calling","json-schema","templates","best-practices","tool-definitions"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:11, name:"Go Tool-Calling Agent", version:"v1.0.0", icon:"🦫", category:"Tool Calling",
+   fmt:"go", type:"skeleton", level:"intermediate",
+   desc:"Idiomatic Go skeleton for an Anthropic tool-calling agent. Uses goroutines for parallel tool execution, channels for streaming, and struct-based tool definitions with JSON tags.",
+   features:["Goroutine-based parallel tools","Channel streaming","Struct tool definitions with JSON tags","Context-aware cancellation","Slog structured logging","Docker multi-stage build"],
+   stack:["go","anthropic-go","slog","docker"],
+   tags:["go","golang","tool-calling","goroutines","streaming","docker"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     CONVERSATIONAL
+  ════════════════════════════════ */
+  {id:12, name:"React Chat Agent UI", version:"v2.0.0", icon:"⚛️", category:"Conversational",
+   fmt:"react", type:"fullstack", level:"beginner",
+   desc:"A polished React chat interface for Claude agents. Features streaming message rendering, markdown support, tool-use visualisation, conversation export, and a themeable design system built with Tailwind.",
+   features:["Streaming token rendering","Markdown + code highlighting","Tool use visualisation panels","Conversation history export","Dark/light theme toggle","Mobile-responsive layout"],
+   stack:["react","typescript","tailwind","anthropic","react-markdown","framer-motion"],
+   tags:["react","chat-ui","streaming","markdown","typescript","tailwind"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:13, name:"NestJS Conversational API", version:"v1.1.0", icon:"🗣️", category:"Conversational",
+   fmt:"nestjs", type:"skeleton", level:"intermediate",
+   desc:"NestJS REST + WebSocket API skeleton for a stateful conversational agent. Stores conversation history in Redis, supports multiple concurrent sessions, and streams Claude responses over WebSocket.",
+   features:["Stateful session management (Redis)","WebSocket streaming endpoint","REST history + management API","Rate limiting per session","Swagger auto-documentation","Interceptor-based logging"],
+   stack:["nestjs","typescript","redis","websocket","swagger","anthropic"],
+   tags:["nestjs","conversational","session","websocket","redis","stateful"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:14, name:"Python CLI Conversational Agent", version:"v1.3.0", icon:"💻", category:"Conversational",
+   fmt:"python", type:"skeleton", level:"beginner",
+   desc:"A clean Python CLI skeleton for a conversational agent with persistent memory, conversation branching, and export. Built with Typer for commands and Rich for beautiful terminal output.",
+   features:["Typer CLI with sub-commands","Rich terminal rendering","Persistent SQLite conversation store","Conversation branching & forks","Export to Markdown / JSON","System prompt management"],
+   stack:["python","anthropic","typer","rich","sqlite","pydantic"],
+   tags:["python","cli","conversational","typer","rich","sqlite","memory"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     CODE GENERATION
+  ════════════════════════════════ */
+  {id:15, name:"Code Generation Agent (Python)", version:"v1.4.0", icon:"⌨️", category:"Code Generation",
+   fmt:"python", type:"skeleton", level:"intermediate",
+   desc:"Skeleton for an agent that generates, tests, and iterates on code. Integrates a sandboxed Python executor (via subprocess), runs generated tests, feeds failures back to Claude, and loops until tests pass.",
+   features:["Sandboxed code execution","Auto-generated test running","Failure → feedback loop","Multi-language support (Python, JS)","Diff-based patch application","Git commit on success"],
+   stack:["anthropic","python","subprocess","gitpython","pytest","ast"],
+   tags:["code-gen","testing","sandbox","agentic-loop","git","iterative"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:16, name:"VS Code Extension Agent (TypeScript)", version:"v1.0.0", icon:"🖥️", category:"Code Generation",
+   fmt:"ts", type:"skeleton", level:"advanced",
+   desc:"TypeScript skeleton for a VS Code extension that embeds a Claude code-generation agent. Accesses the active editor, sends code context, streams completions inline, and handles apply/reject diff UI.",
+   features:["VS Code Extension API integration","Active editor context extraction","Inline diff streaming","Accept/Reject UI with CodeLens","Multi-file context window","Telemetry with OpenTelemetry"],
+   stack:["typescript","vscode-api","anthropic","opentelemetry","webpack"],
+   tags:["vscode","extension","code-gen","typescript","inline","diff"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:17, name:".NET Code Gen Agent (C#)", version:"v1.0.0", icon:"🔷", category:"Code Generation",
+   fmt:"dotnet", type:"skeleton", level:"intermediate",
+   desc:"C# agent skeleton that generates, compiles, and tests .NET code using Roslyn. Streams Claude output, dynamically compiles with CSharpCompilation, runs unit tests via xUnit, and iterates on failures.",
+   features:["Roslyn dynamic compilation","xUnit test runner integration","Streaming Claude output","CSharp syntax validation","In-memory assembly execution","Detailed compilation error feedback"],
+   stack:["dotnet","csharp","roslyn","xunit","anthropic","aspnet"],
+   tags:["dotnet","csharp","roslyn","code-gen","dynamic","compilation"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     DATA PROCESSING
+  ════════════════════════════════ */
+  {id:18, name:"Data Analysis Agent (Python)", version:"v1.2.0", icon:"📊", category:"Data Processing",
+   fmt:"python", type:"skeleton", level:"intermediate",
+   desc:"A data analysis agent that accepts CSV/Excel uploads, executes Pandas transformations via Claude-generated code, produces statistical summaries, and renders charts with matplotlib — all in a safe sandbox.",
+   features:["CSV/Excel ingestion","Safe Pandas code execution sandbox","Statistical summary generation","Matplotlib chart generation","Natural language query interface","Jupyter notebook export"],
+   stack:["anthropic","pandas","matplotlib","fastapi","jupyter","python"],
+   tags:["data-analysis","pandas","matplotlib","csv","sandbox","jupyter"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:19, name:"ETL Pipeline Agent", version:"v1.0.0", icon:"🔄", category:"Data Processing",
+   fmt:"python", type:"skeleton", level:"advanced",
+   desc:"Agent skeleton for an LLM-assisted ETL pipeline. Claude generates dbt models from natural language, validates SQL against the schema, runs incremental loads in Snowflake, and alerts on data quality failures.",
+   features:["Natural language → dbt model generation","Schema-aware SQL validation","Incremental Snowflake loads","Great Expectations quality checks","Slack failure alerting","Airflow DAG skeleton"],
+   stack:["python","dbt","snowflake","great-expectations","airflow","anthropic","slack"],
+   tags:["etl","dbt","snowflake","data-quality","airflow","pipeline"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:20, name:"Document Intelligence Agent (Next.js)", version:"v1.1.0", icon:"📄", category:"Data Processing",
+   fmt:"nextjs", type:"fullstack", level:"intermediate",
+   desc:"Full-stack Next.js agent for document intelligence. Upload PDFs/images, extract structured data with Claude Vision, validate against JSON schema, and export results to CSV or an API webhook.",
+   features:["Multi-format upload (PDF, JPEG, PNG)","Claude Vision extraction","JSON schema validation","Confidence scoring per field","CSV/webhook export","Side-by-side preview UI"],
+   stack:["nextjs","typescript","anthropic","zod","tailwind","vercel"],
+   tags:["document-intelligence","vision","pdf","extraction","nextjs","structured-output"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     CUSTOMER SERVICE
+  ════════════════════════════════ */
+  {id:21, name:"Customer Support Agent (Python + FastAPI)", version:"v1.4.0", icon:"🎧", category:"Customer Service",
+   fmt:"python", type:"skeleton", level:"intermediate",
+   desc:"Production customer support agent with intent classification, CRM tool integration, escalation logic, and human handoff. Includes a confidence threshold that automatically escalates low-confidence responses to a human agent.",
+   features:["Intent classification with confidence","CRM read/write tool calls","Automatic human escalation","Conversation sentiment tracking","Zendesk / Freshdesk webhook","Full audit logging"],
+   stack:["anthropic","fastapi","pydantic","redis","sqlalchemy","zendesk"],
+   tags:["customer-support","intent","escalation","crm","zendesk","fastapi"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:22, name:"Support Agent Best Practices (MD)", version:"v1.0.0", icon:"📘", category:"Customer Service",
+   fmt:"md", type:"bestprac", level:"beginner",
+   desc:"Markdown best-practices guide for deploying customer service agents. Covers system prompt design, guardrails, sensitive topic handling, escalation thresholds, evaluation metrics (CSAT, FCR), and A/B testing methodology.",
+   features:["System prompt design patterns","Guardrail implementation","Sensitive topic detection","Escalation threshold tuning","CSAT & FCR metric tracking","A/B testing framework"],
+   stack:["markdown"],
+   tags:["customer-service","guardrails","evaluation","csat","best-practices","prompts"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:23, name:"React Support Chat Widget", version:"v1.2.0", icon:"💁", category:"Customer Service",
+   fmt:"react", type:"fullstack", level:"beginner",
+   desc:"Embeddable React support chat widget that connects to any backend agent API. Features typing indicators, message status, suggested replies, CSAT rating, and a transcript email button.",
+   features:["Embeddable web component","Typing indicator animation","Suggested reply chips","CSAT 5-star rating flow","Email transcript button","Fully accessible (WCAG AA)"],
+   stack:["react","typescript","tailwind","vite","websocket"],
+   tags:["react","widget","chat","csat","embeddable","typescript"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     RESEARCH & ANALYSIS
+  ════════════════════════════════ */
+  {id:24, name:"Research Agent (Python)", version:"v1.3.0", icon:"🔬", category:"Research & Analysis",
+   fmt:"python", type:"skeleton", level:"intermediate",
+   desc:"Multi-step research agent that decomposes queries, searches the web, fetches and summarises articles, synthesises findings into a structured report, and cites sources with confidence scores.",
+   features:["Query decomposition planner","Brave Search API integration","Article fetch & chunked summarisation","Multi-source synthesis","Citation management","Markdown report generation"],
+   stack:["anthropic","python","httpx","brave-search","beautifulsoup","jinja2"],
+   tags:["research","web-search","synthesis","citations","planning","multi-step"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:25, name:"Financial Analysis Agent (Python)", version:"v1.0.0", icon:"📈", category:"Research & Analysis",
+   fmt:"python", type:"skeleton", level:"advanced",
+   desc:"Agent skeleton for financial data analysis. Fetches stock data via yfinance, computes technical indicators with pandas_ta, generates fundamental analysis from SEC filings, and produces investment memos in Markdown.",
+   features:["yfinance market data integration","pandas_ta technical indicators","SEC EDGAR filing parser","DCF model generation","Risk factor identification","PDF investment memo export"],
+   stack:["anthropic","python","yfinance","pandas-ta","sec-edgar","weasyprint"],
+   tags:["finance","stock-analysis","technical-indicators","sec","investment","memo"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     WORKFLOW AUTOMATION
+  ════════════════════════════════ */
+  {id:26, name:"Workflow Automation Agent (NestJS)", version:"v1.1.0", icon:"⚙️", category:"Workflow Automation",
+   fmt:"nestjs", type:"skeleton", level:"advanced",
+   desc:"NestJS agent skeleton for workflow automation. Defines workflows as JSON DAGs, executes steps with tool calls, handles conditional branching, retries failed steps, and exposes a REST API for triggering and monitoring runs.",
+   features:["JSON DAG workflow definitions","Conditional step branching","Tool-call step execution","Retry with exponential backoff","REST API for run management","Real-time run status via SSE"],
+   stack:["nestjs","typescript","anthropic","bullmq","typeorm","sse"],
+   tags:["workflow","dag","automation","nestjs","branching","retry"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:27, name:"Automation Agent Methodology (JSON)", version:"v1.0.0", icon:"🗂️", category:"Workflow Automation",
+   fmt:"json", type:"method", level:"intermediate",
+   desc:"A JSON methodology template for designing workflow automation agents. Defines the agent manifest schema: triggers, steps, tools, conditions, error handlers, and output schemas — ready to import into any orchestration engine.",
+   features:["Agent manifest JSON schema","Trigger definition patterns","Step & tool binding","Condition expression syntax","Error handler templates","Output validation schema"],
+   stack:["json"],
+   tags:["workflow","json-schema","manifest","methodology","orchestration","dag"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     VISION & MULTIMODAL
+  ════════════════════════════════ */
+  {id:28, name:"Vision Analysis Agent (Python)", version:"v1.2.0", icon:"👁️", category:"Vision & Multimodal",
+   fmt:"python", type:"skeleton", level:"intermediate",
+   desc:"Agent skeleton that processes images and PDFs with Claude Vision. Supports batch image analysis, structured data extraction, visual Q&A, chart interpretation, and document layout understanding.",
+   features:["Batch image processing","Structured extraction with Pydantic","Chart & graph interpretation","PDF page-by-page analysis","Base64 and URL image inputs","Confidence scoring per extraction"],
+   stack:["anthropic","python","pydantic","pillow","pymupdf","fastapi"],
+   tags:["vision","multimodal","image-analysis","pdf","structured-output","pydantic"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  {id:29, name:"Multimodal Agent — Next.js Full-Stack", version:"v1.0.0", icon:"🖼️", category:"Vision & Multimodal",
+   fmt:"nextjs", type:"fullstack", level:"advanced",
+   desc:"Full-stack Next.js multimodal agent. Drag-and-drop image/PDF upload, Claude Vision analysis, annotated image preview with bounding boxes (Canvas API), structured JSON results sidebar, and Supabase persistence.",
+   features:["Drag-and-drop upload UI","Canvas bounding box annotations","Claude Vision API integration","Structured JSON results panel","Supabase storage + database","Vercel Edge streaming"],
+   stack:["nextjs","typescript","anthropic","supabase","tailwind","canvas-api","vercel"],
+   tags:["nextjs","vision","multimodal","canvas","supabase","fullstack","annotations"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+
+  /* ════════════════════════════════
+     GO AGENT
+  ════════════════════════════════ */
+  {id:30, name:"Production Go Agent Skeleton", version:"v1.0.0", icon:"🦫", category:"Tool Calling",
+   fmt:"go", type:"skeleton", level:"advanced",
+   desc:"Idiomatic, production-grade Go agent skeleton with graceful shutdown, structured slog logging, OpenTelemetry tracing, Prometheus metrics, goroutine-safe conversation state, and a Dockerfile for multi-stage builds.",
+   features:["Graceful shutdown handling","OpenTelemetry tracing + Prometheus","Goroutine-safe state manager","Tool registry with reflection","Health + readiness endpoints","Multi-stage Docker build"],
+   stack:["go","anthropic-go","opentelemetry","prometheus","slog","docker"],
+   tags:["go","production","opentelemetry","prometheus","goroutine","docker","advanced"],
+   link:"https://github.com/anthropics/anthropic-quickstarts",
+   docs:"https://docs.anthropic.com"},
+];
+
+/* ─── Format label maps ─── */
+const FMT_LABEL = {python:"Python",dotnet:".NET/C#",react:"React",nextjs:"Next.js",nestjs:"NestJS",go:"Go",ts:"TypeScript",js:"JavaScript",json:"JSON",md:"Markdown"};
+const TYPE_LABEL = {skeleton:"Skeleton",template:"Template",bestprac:"Best Practices",method:"Methodology",fullstack:"Full-Stack"};
+const LEVEL_LABEL = {beginner:"Beginner",intermediate:"Intermediate",advanced:"Advanced"};
+
+/* ─── State ─── */
+if (!localStorage.getItem('agents_v1')) { localStorage.removeItem('agents_data'); localStorage.setItem('agents_v1','1'); }
+let items = JSON.parse(localStorage.getItem('agents_data')||'null') || DEFAULTS;
+let activeF = 'All', q = '';
+
+function save() { localStorage.setItem('agents_data', JSON.stringify(items)); }
+function cats() { return ['All', ...[...new Set(items.map(i=>i.category))].sort()]; }
+function filt() {
+  return items.filter(i => {
+    const mc = activeF==='All' || i.category===activeF;
+    const mq = !q || i.name.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q)
+             || i.tags.some(t=>t.includes(q)) || i.category.toLowerCase().includes(q)
+             || (FMT_LABEL[i.fmt]||'').toLowerCase().includes(q)
+             || (TYPE_LABEL[i.type]||'').toLowerCase().includes(q)
+             || i.stack.some(s=>s.toLowerCase().includes(q));
+    return mc && mq;
+  });
+}
+
+function renderF() {
+  const c = cats();
+  document.getElementById('filters').innerHTML = c.map(x =>
+    `<button class="fb ${x===activeF?'active':''}" onclick="setF('${x}')">${x}</button>`).join('');
+  document.getElementById('catCount').textContent = c.length - 1;
+}
+function setF(f) { activeF=f; renderF(); renderG(); }
+
+function renderG() {
+  const list = filt();
+  document.getElementById('totalCount').textContent = items.length;
+  document.getElementById('showing').textContent = list.length;
+  if (!list.length) {
+    document.getElementById('grid').innerHTML = `<div class="empty"><div class="empty-i">🤖</div><h3>NO TEMPLATES FOUND</h3><p>Try adjusting your filter or search.</p></div>`;
+    return;
+  }
+  document.getElementById('grid').innerHTML = list.map((t,i) => `
+    <div class="card" style="animation-delay:${i*.035}s">
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(57,255,20,.06);border:1px solid rgba(57,255,20,.15)">${t.icon}</div>
+        <div class="card-title-block">
+          <div class="card-name">${esc(t.name)}</div>
+          <div class="card-cat">${esc(t.category)} · ${esc(t.version)}</div>
+        </div>
+      </div>
+      <div class="badges">
+        <span class="badge fmt-${t.fmt}">${FMT_LABEL[t.fmt]||t.fmt}</span>
+        <span class="badge type-${t.type}">${TYPE_LABEL[t.type]||t.type}</span>
+        <span class="badge lvl-${t.level}">${LEVEL_LABEL[t.level]||t.level}</span>
+      </div>
+      <p class="card-desc">${esc(t.desc)}</p>
+      <div class="features">${(t.features||[]).slice(0,4).map(f=>`<div class="feat">${esc(f)}</div>`).join('')}</div>
+      <div class="stack-row">${(t.stack||[]).map(s=>`<span class="stack-chip">${esc(s)}</span>`).join('')}</div>
+      <div class="sep"></div>
+      <div class="card-foot">
+        <a class="btn bp" href="${esc(t.link)}" target="_blank">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </a>
+        ${t.docs?`<a class="btn bg" href="${esc(t.docs)}" target="_blank">Docs</a>`:''}
+        <button class="btn bx" onclick="del(${t.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function del(id) {
+  if (!confirm('Remove this template?')) return;
+  items = items.filter(i=>i.id!==id); save(); renderF(); renderG();
+}
+
+function openModal()  { document.getElementById('overlay').classList.add('open'); }
+function closeModal() { document.getElementById('overlay').classList.remove('open'); clearF(); }
+function bc(e)        { if (e.target===document.getElementById('overlay')) closeModal(); }
+function clearF() {
+  ['f_name','f_version','f_desc','f_features','f_stack','f_tags','f_link','f_docs','f_icon'].forEach(id=>document.getElementById(id).value='');
+}
+
+const ACCENTS=['#39ff14','#4fc3f7','#ffd600','#ff6b35','#b39ddb','#66bb6a','#61dafb','#e0234e'];
+function addItem() {
+  const name=document.getElementById('f_name').value.trim(),
+        desc=document.getElementById('f_desc').value.trim(),
+        link=document.getElementById('f_link').value.trim();
+  if (!name||!desc||!link) { alert('Name, Description, and URL are required.'); return; }
+  const features = document.getElementById('f_features').value.split('\n').map(l=>l.trim()).filter(Boolean);
+  const stack    = document.getElementById('f_stack').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const tags     = document.getElementById('f_tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  items.push({
+    id:Date.now(), name, version:document.getElementById('f_version').value.trim()||'v1.0.0',
+    icon:document.getElementById('f_icon').value.trim()||'🤖',
+    category:document.getElementById('f_cat').value,
+    fmt:document.getElementById('f_fmt').value,
+    type:document.getElementById('f_type').value,
+    level:document.getElementById('f_level').value,
+    desc, features, stack, tags, link,
+    docs:document.getElementById('f_docs').value.trim(),
+  });
+  save(); closeModal(); renderF(); renderG();
+}
+
+document.getElementById('searchInput').addEventListener('input', e=>{ q=e.target.value.toLowerCase(); renderG(); });
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+renderF(); renderG();
+</script>
+</body>
+</html>
